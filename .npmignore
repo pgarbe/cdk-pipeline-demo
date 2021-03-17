@@ -3,7 +3,6 @@
 /.versionrc.json
 /coverage
 /test
-/.mergify.yml
 /tsconfig.json
 /src
 dist

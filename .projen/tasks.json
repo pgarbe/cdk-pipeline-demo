@@ -14,7 +14,7 @@
           "exec": "rm -fr lib/"
         },
         {
-          "exec": "jest --passWithNoTests --all --updateSnapshot"
+          "exec": "jest --passWithNoTests --all"
         },
         {
           "spawn": "eslint"
@@ -72,10 +72,6 @@
         },
         {
           "exec": "npx projen"
-        },
-        {
-          "exec": "git diff --exit-code",
-          "name": "Anti-tamper check"
         }
       ]
     },

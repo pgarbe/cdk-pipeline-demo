@@ -52,10 +52,6 @@ cdk.out/
 !version.json
 !/.versionrc.json
 !/test
-!/.github/workflows/build.yml
-!/.mergify.yml
-!/.github/dependabot.yml
-!/.github/pull_request_template.md
 !/tsconfig.json
 !/src
 !/tsconfig.jest.json
