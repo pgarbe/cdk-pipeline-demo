@@ -6,10 +6,14 @@ import * as pipelines from '@aws-cdk/pipelines';
 import { InfrastructureStack } from './infrastructure-stack';
 
 export class Application extends cdk.Stage {
+
+  public readonly apiUrl: cdk.CfnOutput;
+
   constructor(scope: cdk.Construct, id: string, props?: cdk.StageProps) {
     super(scope, id, props);
 
-    new InfrastructureStack(this, 'infra');
+    const infraStack = new InfrastructureStack(this, 'infra');
+    this.apiUrl = infraStack.apiUrl;
   }
 }
 export class PipelineStack extends cdk.Stack {
@@ -43,8 +47,20 @@ export class PipelineStack extends cdk.Stack {
       crossAccountKeys: false, // save money if you don't do x-account deployments
     });
 
-    // Do this as many times as necessary with any account and region
-    // Account and region may different from the pipeline's.
-    pipeline.addApplicationStage(new Application(this, 'prod', { env: { region: 'eu-west-1' } }));
+    // pipeline.addApplicationStage(new Application(this, 'prod', { env: { region: 'eu-west-1' } }));
+
+    const app = new Application(this, 'prod', { env: { region: 'eu-west-1' } });
+    const appStage = pipeline.addApplicationStage(app);
+
+    appStage.addActions(new pipelines.ShellScriptAction({
+      actionName: 'SimpleValidation',
+      commands: ['curl -Ssf $URL'],
+      environment: {
+        buildImage: codebuild.LinuxBuildImage.STANDARD_5_0,
+      },
+      useOutputs: {
+        URL: pipeline.stackOutput(app.apiUrl),
+      },
+    }));
   }
 }

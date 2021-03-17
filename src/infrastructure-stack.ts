@@ -7,11 +7,14 @@ import * as cdk from '@aws-cdk/core';
 
 
 export class InfrastructureStack extends cdk.Stack {
+
+  public readonly apiUrl: cdk.CfnOutput;
+
   constructor(scope: cdk.Construct, id: string, props: cdk.StackProps = {}) {
     super(scope, id, props);
 
     // Fargate and CloudMap needs to be setup in a VPC
-    const vpc = this.getVpc(this);
+    const vpc = new ec2.Vpc(this, 'vpc', { maxAzs: 2 });
 
     // CloudMap Namespace
     const namespace = new servicediscovery.PrivateDnsNamespace(this, 'Namespace', {
@@ -65,34 +68,34 @@ export class InfrastructureStack extends cdk.Stack {
       defaultIntegration,
     });
 
-    new cdk.CfnOutput(this, 'HTTP API Url', {
+    this.apiUrl = new cdk.CfnOutput(this, 'HTTP API Url', {
       value: api.url ?? 'Something went wrong with the deploy',
     });
   }
 
-  getVpc(scope: cdk.Construct): ec2.IVpc {
-    return ec2.Vpc.fromVpcAttributes(scope, 'vpc', {
-      vpcId: cdk.Fn.importValue('vpc-VPC'),
-      availabilityZones: ['eu-west-1a', 'eu-west-1b'],
-      isolatedSubnetIds: [],
-      isolatedSubnetRouteTableIds: [],
-      privateSubnetIds: [
-        cdk.Fn.importValue('vpc-SubnetAPrivate'),
-        cdk.Fn.importValue('vpc-SubnetBPrivate'),
-      ],
-      privateSubnetRouteTableIds: [
-        cdk.Fn.importValue('vpc-RouteTableAPrivate'),
-        cdk.Fn.importValue('vpc-RouteTableBPrivate'),
-      ],
-      publicSubnetIds: [
-        cdk.Fn.importValue('vpc-SubnetAPublic'),
-        cdk.Fn.importValue('vpc-SubnetBPublic'),
-      ],
-      publicSubnetRouteTableIds: [
-        cdk.Fn.importValue('vpc-RouteTableAPublic'),
-        cdk.Fn.importValue('vpc-RouteTableBPublic'),
-      ],
-    });
-  }
+  // getVpc(scope: cdk.Construct): ec2.IVpc {
+  //   return ec2.Vpc.fromVpcAttributes(scope, 'vpc', {
+  //     vpcId: cdk.Fn.importValue('vpc-VPC'),
+  //     availabilityZones: ['eu-west-1a', 'eu-west-1b'],
+  //     isolatedSubnetIds: [],
+  //     isolatedSubnetRouteTableIds: [],
+  //     privateSubnetIds: [
+  //       cdk.Fn.importValue('vpc-SubnetAPrivate'),
+  //       cdk.Fn.importValue('vpc-SubnetBPrivate'),
+  //     ],
+  //     privateSubnetRouteTableIds: [
+  //       cdk.Fn.importValue('vpc-RouteTableAPrivate'),
+  //       cdk.Fn.importValue('vpc-RouteTableBPrivate'),
+  //     ],
+  //     publicSubnetIds: [
+  //       cdk.Fn.importValue('vpc-SubnetAPublic'),
+  //       cdk.Fn.importValue('vpc-SubnetBPublic'),
+  //     ],
+  //     publicSubnetRouteTableIds: [
+  //       cdk.Fn.importValue('vpc-RouteTableAPublic'),
+  //       cdk.Fn.importValue('vpc-RouteTableBPublic'),
+  //     ],
+  //   });
+  // }
 }
 
