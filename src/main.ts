@@ -9,6 +9,6 @@ const env = {
 };
 
 const app = new cdk.App();
-new PipelineStack(app, 'my-stack-dev', { env });
+new PipelineStack(app, 'demo-pipeline', { env });
 
 app.synth();
