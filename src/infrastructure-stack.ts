@@ -10,13 +10,8 @@ export class InfrastructureStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: cdk.StackProps = {}) {
     super(scope, id, props);
 
-    // define resources here...
-
-
     // Fargate and CloudMap needs to be setup in a VPC
-    const vpc = new ec2.Vpc(this, 'Vpc', {
-      maxAzs: 2, // Default is all AZs in the region
-    });
+    const vpc = this.getVpc(this);
 
     // CloudMap Namespace
     const namespace = new servicediscovery.PrivateDnsNamespace(this, 'Namespace', {
@@ -72,6 +67,31 @@ export class InfrastructureStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'HTTP API Url', {
       value: api.url ?? 'Something went wrong with the deploy',
+    });
+  }
+
+  getVpc(scope: cdk.Construct): ec2.IVpc {
+    return ec2.Vpc.fromVpcAttributes(scope, 'vpc', {
+      vpcId: cdk.Fn.importValue('vpc-VPC'),
+      availabilityZones: ['eu-west-1a', 'eu-west-1b'],
+      isolatedSubnetIds: [],
+      isolatedSubnetRouteTableIds: [],
+      privateSubnetIds: [
+        cdk.Fn.importValue('vpc-SubnetAPrivate'),
+        cdk.Fn.importValue('vpc-SubnetBPrivate'),
+      ],
+      privateSubnetRouteTableIds: [
+        cdk.Fn.importValue('vpc-RouteTableAPrivate'),
+        cdk.Fn.importValue('vpc-RouteTableBPrivate'),
+      ],
+      publicSubnetIds: [
+        cdk.Fn.importValue('vpc-SubnetAPublic'),
+        cdk.Fn.importValue('vpc-SubnetBPublic'),
+      ],
+      publicSubnetRouteTableIds: [
+        cdk.Fn.importValue('vpc-RouteTableAPublic'),
+        cdk.Fn.importValue('vpc-RouteTableBPublic'),
+      ],
     });
   }
 }

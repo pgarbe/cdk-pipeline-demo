@@ -45,6 +45,6 @@ export class PipelineStack extends cdk.Stack {
 
     // Do this as many times as necessary with any account and region
     // Account and region may different from the pipeline's.
-    pipeline.addApplicationStage(new Application(this, 'prod'));
+    pipeline.addApplicationStage(new Application(this, 'prod', { env: { region: 'eu-west-1' } }));
   }
 }
